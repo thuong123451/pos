@@ -136,17 +136,14 @@
 
   <p class="total-in-words"><strong>Bằng Chữ:</strong> <span id="bang-chu">Không</span></p>
 
-<div class="qr-section">
-<h3>QUÉT MÃ QR ĐỂ THANH TOÁN</h3>
-<img id="qr-code-img" 
-     src="https://img.vietqr.io/image/970407-19033381058014-compact.png?amount=1192600&addInfo=DH2508181954" 
-     alt="VietQR Code">
-<div class="bank-info">
-  <p id="account-holder" style="font-weight: bold;">CTY TNHH Công Nghệ VTTecom</p>
-  <p id="account-number">19033381058014</p>
-</div>
-
-</div>
+  <div class="qr-section">
+    <h3>QUÉT MÃ QR ĐỂ THANH TOÁN</h3>
+    <img id="qr-code-img" src="" alt="VietQR Code">
+    <div class="bank-info">
+      <p id="account-holder" style="font-weight: bold;">CTY TNHH Công Nghệ VTTecom</p>
+      <p id="account-number">19033381058014</p>
+    </div>
+  </div>
 
   <div class="footer">
     <p>Cảm ơn quý khách và hẹn gặp lại!</p>
@@ -254,13 +251,14 @@
     document.getElementById('bang-chu').textContent = docso(amount)+" đồng.";
 
     // QR code
-const accountNumber = getParam('account_number') || '19033381058014'; // số TK mặc định
-const bankId = '970407'; // Techcombank
-const qrInfo = encodeURIComponent(`TT don hang ${so_don_hang || ''}`);
-document.getElementById('qr-code-img').src =
-  `https://img.vietqr.io/image/${bankId}-${accountNumber}-compact.png?amount=${amount}&addInfo=${qrInfo}`;
-
+    const accountNumber = getParam('account_number') || '19033381058014'; // số TK mặc định
+    const bankId = '970407'; // Techcombank
+    const qrInfo = encodeURIComponent(`TT don hang ${so_don_hang || ''}`);
+    document.getElementById('qr-code-img').src =
+      `https://img.vietqr.io/image/${bankId}-${accountNumber}-compact.png?amount=${amount}&addInfo=${qrInfo}`;
+  }
 </script>
 
 </body>
 </html>
+
