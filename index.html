@@ -41,10 +41,7 @@
       body { padding: 0; }
       .action-buttons { display: none; }
       .receipt { width: 100%; box-shadow: none; }
-      #watermark { color: rgba(0, 0, 0, 0.06) !important; }
     }
-
-    #watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 60px; font-weight: 700; color: rgba(0, 0, 0, 0.08); pointer-events: none; z-index: 0; display: none; }
 
     .header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; position: relative; z-index: 1; }
     .header #company-logo { width: 45px; height: 45px; flex-shrink: 0; }
@@ -89,8 +86,6 @@
 </div>
 
 <div class="receipt" id="receipt-content">
-  <div id="watermark">BẢN NHÁP</div>
-
   <div class="header">
     <img id="company-logo" src="https://vttecom.com/wp-content/uploads/2025/06/VTT-la-logo-ban-hang-dien-tu.jpg" alt="Logo">
     <div class="company-info">
@@ -106,10 +101,8 @@
 
   <div class="info">
     <p><span>Số Đơn Hàng: <strong id="so-don-hang">DH2508181954</strong></span></p>
-    <p>
-      <span>Số Bàn : <span id="so_ban">Cập nhật </span></span>
-      <span>Ngày Đặt: <span id="ngay-dat">18/08/2025</span></span>
-    </p>
+    <p id="so-ban-wrap"><span>Số Bàn: <strong id="so-ban">--</strong></span></p>
+    <p><span>Ngày Đặt: <span id="ngay-dat">18/08/2025</span></span></p>
     <p><span>In Lúc: <span id="in-luc">21:02:31 18/8/2025</span></span></p>
   </div>
 
@@ -145,7 +138,7 @@
 
   <div class="qr-section">
     <h3>QUÉT MÃ QR ĐỂ THANH TOÁN</h3>
-   <img src="https://img.vietqr.io/image/970407-123456789-compact.png?amount=500000&addInfo=Thanh%20toan%20don%20hang%20DH1234&accountName=CTY%20TNHH%20Cong%20Nghe%20VTTecom" alt="QR thanh toán" style="max-width: 60%; height: auto;" >
+    <img id="qr-code-img" src="https://img.vietqr.io/image/970407-123456789-compact.png" alt="QR thanh toán">
     <div class="bank-info">
       <p><strong>Ngân hàng:</strong> Techcombank</p>
       <p><strong>Chủ TK:</strong> CTY TNHH Công Nghệ VTTecom</p>
@@ -215,20 +208,21 @@
       alert("✅ Hóa đơn đã gửi lên Thuế!");
     });
 
-    // Nếu không có tham số => hiện watermark
-    if (!getParam('so_don_hang')) {
-      document.getElementById('watermark').style.display = 'block';
-      return;
-    }
-
     // Điền thông tin
     const so_don_hang = getParam('so_don_hang');
+    const so_ban = getParam('so_ban');
     const amount = parseInt(getParam('tong_tien_sau_vat')) || 0;
-    document.getElementById('so-don-hang').textContent = so_don_hang;
-    document.getElementById('khach-hang').textContent = getParam('khach_hang')||'Khách lẻ';
+
+    document.getElementById('so-don-hang').textContent = so_don_hang || '---';
     document.getElementById('ngay-dat').textContent = getParam('ngay_dat')||'';
     document.getElementById('in-luc').textContent = getCurrentDateTime();
     document.getElementById('ghi-chu').textContent = getParam('ghi_chu')||'Không có';
+
+    if (so_ban) {
+      document.getElementById('so-ban').textContent = so_ban;
+    } else {
+      document.getElementById('so-ban-wrap').style.display = 'none';
+    }
 
     // Bảng sản phẩm
     const productsData = getParam('products');
@@ -259,7 +253,7 @@
 
     // QR code
     const accountNumber = getParam('account_number')||'123456789';
-    const accountHolder = getParam('account_holder')||'CTY TNHH GIẢI PHÁP SỐ EMS';
+    const accountHolder = getParam('account_holder')||'CTY TNHH CÔNG NGHỆ VTTECOM';
     const qrInfo = encodeURIComponent(`TT don hang ${so_don_hang}`);
     document.getElementById('qr-code-img').src =
       `https://img.vietqr.io/image/970407-${accountNumber}-compact.png?amount=${amount}&addInfo=${qrInfo}&accountName=${encodeURIComponent(accountHolder)}`;
@@ -268,5 +262,3 @@
 
 </body>
 </html>
-
-
