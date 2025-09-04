@@ -14,17 +14,29 @@
     @media screen {
       body { background-color: #f0f0f0; padding: 20px 0; display: flex; flex-direction: column; align-items: center; }
       .receipt { padding: 4mm; box-shadow: 0 0 15px rgba(0,0,0,0.15); }
-      .action-buttons { margin-bottom: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+      /* --- Nút hành động chia đều theo 80mm --- */
+      .action-buttons {
+        margin-bottom: 15px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+        gap: 6px;
+        max-width: 80mm;
+        margin-left: auto;
+        margin-right: auto;
+      }
       .action-buttons button {
-        padding: 6px 14px;
-        font-size: 14px;
-        font-weight: 500;
+        padding: 8px 4px;
+        font-size: 13px;
+        font-weight: 600;
         border: none;
         border-radius: 6px;
         cursor: pointer;
         transition: background-color 0.3s;
         color: white;
+        white-space: nowrap;
       }
+
       #print-btn { background-color: #28a745; } 
       #print-btn:hover { background-color: #218838; }
       #download-pdf-btn { background-color: #dc3545; } 
@@ -76,80 +88,18 @@
 </div>
 
 <div class="receipt" id="receipt-content">
-  <!-- nội dung hóa đơn của bạn giữ nguyên -->
+  <!-- nội dung hóa đơn -->
 </div>
 
 <script>
-  // --- Hàm đọc số giữ nguyên ---
-  function docso(number) {
-    if (number == null || isNaN(number) || Number(number) === 0) {
-      return 'Không';
-    }
-    let str = parseInt(number) + '';
-    const chuSo = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
-    const donVi = ['', 'nghìn', 'triệu', 'tỷ'];
-
-    function docBaChuSo(baSo) {
-      let tram, chuc, donvi;
-      let ketQua = '';
-      tram = parseInt(baSo[0]);
-      chuc = parseInt(baSo[1]);
-      donvi = parseInt(baSo[2]);
-      if (tram > 0 || baSo.length > 3) {
-        ketQua += chuSo[tram] + ' trăm ';
-      }
-      if (chuc > 1) {
-        ketQua += chuSo[chuc] + ' mươi ';
-        if (donvi === 1) {
-          ketQua += 'mốt ';
-        }
-      } else if (chuc === 1) {
-        ketQua += 'mười ';
-      } else if (chuc === 0 && donvi > 0 && baSo.length > 2) {
-        ketQua += 'linh ';
-      }
-      if (donvi === 5 && chuc > 0) {
-        ketQua += 'lăm ';
-      } else if (donvi > 0 && donvi !== 1 && donvi !== 5) {
-        ketQua += chuSo[donvi] + ' ';
-      } else if (donvi === 1 && chuc > 1) {
-        // đã xử lý bằng "mốt"
-      } else if (donvi === 1){
-        ketQua += chuSo[donvi] + ' ';
-      }
-      return ketQua;
-    }
-
-    let soNhom = Math.ceil(str.length / 3);
-    let strNhom = [];
-    for (let i = 0; i < soNhom; i++) {
-      let startIndex = str.length - (i + 1) * 3;
-      strNhom.push(str.substring(Math.max(0, startIndex), startIndex + 3));
-    }
-
-    let ketQua = '';
-    for (let i = soNhom - 1; i >= 0; i--) {
-      if (/^\d{1,3}$/.test(strNhom[i])) {
-        let docNhom = docBaChuSo(strNhom[i].padStart(3, '0'));
-        if (docNhom !== '' && docNhom !== 'không trăm ') {
-          ketQua += docNhom + (donVi[i] || '') + ' ';
-        }
-      }
-    }
-    
-    ketQua = ketQua.replace(/\s+/g, ' ').trim();
-    return ketQua.charAt(0).toUpperCase() + ketQua.slice(1);
-  }
-
   window.onload = function () {
     const getParam = (name) => new URLSearchParams(window.location.search).get(name);
-    const formatCurrency = (number) => isNaN(number) || number === null ? "0" : parseInt(number).toLocaleString('de-DE');
     const so_don_hang = getParam('so_don_hang') || "DH2508181954";
 
-    // Nút in
+    // In
     document.getElementById('print-btn').addEventListener('click', () => window.print());
 
-    // Nút tải PDF
+    // Tải PDF
     document.getElementById('download-pdf-btn').addEventListener('click', () => {
       const element = document.getElementById('receipt-content');
       const heightInMm = element.offsetHeight * 25.4 / 96;
@@ -157,7 +107,7 @@
       html2pdf().from(element).set(opt).save();
     });
 
-    // === NÚT GỬI THUẾ ===
+    // Gửi Thuế
     document.getElementById('send-tax-btn').addEventListener('click', async () => {
       const element = document.getElementById('receipt-content');
       const opt = {
@@ -172,8 +122,7 @@
         const pdfBlob = await html2pdf().from(element).set(opt).outputPdf('blob');
         const formData = new FormData();
         formData.append("file", pdfBlob, opt.filename);
-        formData.append("so_don_hang", document.getElementById('so-don-hang').textContent);
-        formData.append("tong_tien", document.getElementById('tong-tien-sau-vat').textContent);
+        formData.append("so_don_hang", so_don_hang);
 
         const response = await fetch("https://api.thue.vn/send", {
           method: "POST",
@@ -195,4 +144,3 @@
 
 </body>
 </html>
-
