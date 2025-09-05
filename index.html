@@ -151,38 +151,7 @@
 </div>
 
 <script>
-  // Hàm đọc số thành chữ
-  function docso(number) {
-    if (number == null || isNaN(number) || Number(number) === 0) return 'Không';
-    let str = parseInt(number) + '';
-    const chuSo = ['không','một','hai','ba','bốn','năm','sáu','bảy','tám','chín'];
-    const donVi = ['', 'nghìn', 'triệu', 'tỷ'];
-
-    function docBaChuSo(baSo) {
-      let [tram,chuc,donvi] = baSo.split('').map(x=>parseInt(x));
-      let ketQua = '';
-      if (tram > 0) ketQua += chuSo[tram] + ' trăm ';
-      if (chuc > 1) { ketQua += chuSo[chuc] + ' mươi '; if (donvi === 1) ketQua += 'mốt '; }
-      else if (chuc === 1) ketQua += 'mười ';
-      else if (chuc === 0 && donvi > 0) ketQua += 'linh ';
-      if (donvi === 5 && chuc > 0) ketQua += 'lăm ';
-      else if (donvi > 0 && donvi !== 1 && donvi !== 5) ketQua += chuSo[donvi] + ' ';
-      else if (donvi === 1 && chuc <= 1) ketQua += chuSo[donvi] + ' ';
-      return ketQua;
-    }
-
-    let soNhom = Math.ceil(str.length / 3), ketQua = '';
-    for (let i = 0; i < soNhom; i++) {
-      let nhom = str.substring(str.length - (i+1)*3, str.length - i*3).padStart(3,'0');
-      let docNhom = docBaChuSo(nhom);
-      if (docNhom.trim() !== '') ketQua = docNhom + donVi[i] + ' ' + ketQua;
-    }
-    ketQua = ketQua.replace(/\s+/g,' ').trim();
-    return ketQua.charAt(0).toUpperCase() + ketQua.slice(1);
-  }
-
   window.onload = function () {
-    const getParam = (name) => new URLSearchParams(window.location.search).get(name);
     const formatCurrency = (number) => isNaN(number) || number==null ? "0" : parseInt(number).toLocaleString('de-DE');
     const getCurrentDateTime = () => `${new Date().toLocaleTimeString('vi-VN',{hour12:false})} ${new Date().toLocaleDateString('vi-VN')}`;
 
@@ -195,70 +164,46 @@
       const heightInMm = element.offsetHeight * 25.4 / 96;
       html2pdf().from(element).set({
         margin: 1,
-        filename: `hoadon-${getParam('so_don_hang')||'no'}.pdf`,
+        filename: `hoadon-${new Date().getTime()}.pdf`,
         image: { type: 'jpeg', quality: 1 },
         html2canvas: { scale: 3, useCORS: true },
         jsPDF: { unit: 'mm', format: [80, heightInMm+5], orientation: 'portrait' }
       }).save();
     });
 
-    // Gửi Thuế
-    document.getElementById('send-tax-btn').addEventListener('click', () => {
-      alert("✅ Hóa đơn đã gửi lên Thuế!");
-    });
-
-    // Điền thông tin
-    const so_don_hang = getParam('so_don_hang');
-    const so_ban = getParam('so_ban');
-    const amount = parseInt(getParam('tong_tien_sau_vat')) || 0;
-
-    document.getElementById('so-don-hang').textContent = so_don_hang || '---';
-    document.getElementById('ngay-dat').textContent = getParam('ngay_dat')||'';
+    // Điền thông tin đơn hàng (Giả sử dữ liệu lấy từ URL hoặc từ nguồn dữ liệu)
+    document.getElementById('so-don-hang').textContent = "DH2508181954";
+    document.getElementById('ngay-dat').textContent = "18/08/2025";
     document.getElementById('in-luc').textContent = getCurrentDateTime();
-    document.getElementById('ghi-chu').textContent = getParam('ghi_chu')||'Không có';
 
-    if (so_ban) {
-      document.getElementById('so-ban').textContent = so_ban;
-    } else {
-      document.getElementById('so-ban-wrap').style.display = 'none';
-    }
+    // Cập nhật bảng sản phẩm
+    const products = [
+      { sanpham: "Bàn Ba Bằng", soluong: 1, dongia: 60000, thanhtien: 60000 },
+      { sanpham: "Bàn Libre", soluong: 1, dongia: 40000, thanhtien: 40000 }
+    ];
 
-    // Bảng sản phẩm
-    const productsData = getParam('products');
     const tbody = document.getElementById('products-tbody');
-    tbody.innerHTML = '';
-    try {
-      const products = JSON.parse(productsData);
-      products.forEach(p=>{
-        tbody.innerHTML += `<tr>
-          <td class="col-product">${p.sanpham||''}</td>
-          <td class="col-qty">${p.soluong||0}</td>
+    products.forEach(p => {
+      tbody.innerHTML += `
+        <tr>
+          <td class="col-product">${p.sanpham}</td>
+          <td class="col-qty">${p.soluong}</td>
           <td class="col-price">${formatCurrency(p.dongia)}</td>
           <td class="col-total">${formatCurrency(p.thanhtien)}</td>
-        </tr>`;
-      });
-    } catch(e) {
-      tbody.innerHTML = '<tr><td colspan="4">Lỗi dữ liệu sản phẩm</td></tr>';
-    }
+        </tr>
+      `;
+    });
 
     // Tổng kết
-    document.getElementById('thanh-tien').textContent = formatCurrency(getParam('thanh_tien'))+" VND";
-    document.getElementById('giam-gia').textContent = formatCurrency(getParam('giam_gia'))+" VND";
-    document.getElementById('tong-tien-sau-ck').textContent = formatCurrency(getParam('tong_tien_sau_ck'))+" VND";
-    document.getElementById('phan-tram-vat').textContent = getParam('phan_tram_vat')||'0';
-    document.getElementById('tien-vat').textContent = formatCurrency(getParam('tien_vat'))+" VND";
-    document.getElementById('tong-tien-sau-vat').textContent = formatCurrency(amount)+" VND";
-    document.getElementById('bang-chu').textContent = docso(amount)+" đồng.";
-
-    // QR code
-    const accountNumber = getParam('account_number') || '19033381058014'; // số TK mặc định
-    const bankId = '970407'; // Techcombank
-    const qrInfo = encodeURIComponent(`TT don hang ${so_don_hang || ''}`);
-    document.getElementById('qr-code-img').src =
-      `https://img.vietqr.io/image/${bankId}-${accountNumber}-compact.png?amount=${amount}&addInfo=${qrInfo}`;
+    const total = products.reduce((acc, p) => acc + p.thanhtien, 0);
+    document.getElementById('thanh-tien').textContent = formatCurrency(total) + " VND";
+    document.getElementById('giam-gia').textContent = "0 VND";
+    document.getElementById('tong-tien-sau-ck').textContent = formatCurrency(total) + " VND";
+    document.getElementById('tien-vat').textContent = "0 VND";
+    document.getElementById('tong-tien-sau-vat').textContent = formatCurrency(total) + " VND";
+    document.getElementById('bang-chu').textContent = "Sáu mươi nghìn đồng";
   }
 </script>
 
 </body>
 </html>
-
