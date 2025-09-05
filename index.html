@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hóa Đơn Bán Hàng</title>
   <style>
-    body { font-family: 'Roboto', sans-serif; font-size: 12px; background-color: #fff; padding: 20px; }
+    body { font-family: 'Roboto', sans-serif; font-size: 12px; padding: 20px; }
     table { width: 100%; border-collapse: collapse; margin-top: 8px; }
     table th, table td { padding: 8px; text-align: left; border: 1px solid #ddd; }
     table th { font-weight: 700; }
@@ -14,7 +14,7 @@
 <body>
 
   <h2>Bảng Sản Phẩm</h2>
-  <table id="products-table">
+  <table>
     <thead>
       <tr>
         <th>Sản Phẩm</th>
@@ -28,6 +28,14 @@
     </tbody>
   </table>
 
+  <div class="summary">
+    <div><strong>Thành Tiền:</strong> <span id="thanh-tien">0 VND</span></div>
+    <div><strong>Giảm Giá:</strong> <span id="giam-gia">0 VND</span></div>
+    <div><strong>Tổng Tiền Sau Chiết Khấu:</strong> <span id="tong-tien-sau-ck">0 VND</span></div>
+    <div><strong>VAT:</strong> <span id="tien-vat">0 VND</span></div>
+    <div><strong>Phải Thanh Toán:</strong> <span id="tong-tien-sau-vat">0 VND</span></div>
+  </div>
+
   <script>
     window.onload = function () {
       const formatCurrency = (number) => isNaN(number) || number == null ? "0" : parseInt(number).toLocaleString('de-DE');
@@ -37,26 +45,31 @@
         { "SanPham": "Sản phẩm 1", "SoLuong": 2, "DonGia": 50000, "ThanhTien": 100000 },
         { "SanPham": "Sản phẩm 2", "SoLuong": 1, "DonGia": 200000, "ThanhTien": 200000 }
       ];
-      
+
       const tbody = document.getElementById('products-tbody');
       tbody.innerHTML = ''; // Xóa nội dung cũ
 
-      // Hiển thị các sản phẩm trong bảng
-      if (productsData.length > 0) {
-        productsData.forEach(p => {
-          tbody.innerHTML += `<tr>
-            <td>${p.SanPham}</td>
-            <td>${p.SoLuong}</td>
-            <td>${formatCurrency(p.DonGia)} VND</td>
-            <td>${formatCurrency(p.ThanhTien)} VND</td>
-          </tr>`;
-        });
-      } else {
-        tbody.innerHTML = '<tr><td colspan="4">Không có sản phẩm nào.</td></tr>';
-      }
+      let totalAmount = 0;
+
+      // Hiển thị các sản phẩm trong bảng và tính tổng
+      productsData.forEach(p => {
+        tbody.innerHTML += `<tr>
+          <td>${p.SanPham}</td>
+          <td>${p.SoLuong}</td>
+          <td>${formatCurrency(p.DonGia)} VND</td>
+          <td>${formatCurrency(p.ThanhTien)} VND</td>
+        </tr>`;
+        totalAmount += p.ThanhTien;
+      });
+
+      // Tính toán tổng số tiền
+      document.getElementById('thanh-tien').textContent = formatCurrency(totalAmount) + " VND";
+      document.getElementById('giam-gia').textContent = "0 VND";  // Giảm giá mặc định là 0
+      document.getElementById('tong-tien-sau-ck').textContent = formatCurrency(totalAmount) + " VND";
+      document.getElementById('tien-vat').textContent = formatCurrency(totalAmount * 0.1) + " VND";  // 10% VAT giả định
+      document.getElementById('tong-tien-sau-vat').textContent = formatCurrency(totalAmount * 1.1) + " VND";  // Sau VAT
     }
   </script>
 
 </body>
 </html>
-
