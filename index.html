@@ -40,11 +40,8 @@
     window.onload = function () {
       const formatCurrency = (number) => isNaN(number) || number == null ? "0" : parseInt(number).toLocaleString('de-DE');
 
-      // Dữ liệu sản phẩm mẫu
-      const productsData = [
-        { "SanPham": "Sản phẩm 1", "SoLuong": 2, "DonGia": 50000, "ThanhTien": 100000 },
-        { "SanPham": "Sản phẩm 2", "SoLuong": 1, "DonGia": 200000, "ThanhTien": 200000 }
-      ];
+      // Lấy dữ liệu sản phẩm từ URL (hoặc có thể lấy từ AppSheet, database, hoặc input khác)
+      const productsData = JSON.parse(decodeURIComponent(new URLSearchParams(window.location.search).get('products') || '[]'));
 
       const tbody = document.getElementById('products-tbody');
       tbody.innerHTML = ''; // Xóa nội dung cũ
@@ -52,15 +49,19 @@
       let totalAmount = 0;
 
       // Hiển thị các sản phẩm trong bảng và tính tổng
-      productsData.forEach(p => {
-        tbody.innerHTML += `<tr>
-          <td>${p.SanPham}</td>
-          <td>${p.SoLuong}</td>
-          <td>${formatCurrency(p.DonGia)} VND</td>
-          <td>${formatCurrency(p.ThanhTien)} VND</td>
-        </tr>`;
-        totalAmount += p.ThanhTien;
-      });
+      if (productsData.length > 0) {
+        productsData.forEach(p => {
+          tbody.innerHTML += `<tr>
+            <td>${p.SanPham}</td>
+            <td>${p.SoLuong}</td>
+            <td>${formatCurrency(p.DonGia)} VND</td>
+            <td>${formatCurrency(p.ThanhTien)} VND</td>
+          </tr>`;
+          totalAmount += p.ThanhTien;
+        });
+      } else {
+        tbody.innerHTML = '<tr><td colspan="4">Không có sản phẩm nào.</td></tr>';
+      }
 
       // Tính toán tổng số tiền
       document.getElementById('thanh-tien').textContent = formatCurrency(totalAmount) + " VND";
