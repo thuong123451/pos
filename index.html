@@ -32,43 +32,31 @@
     window.onload = function () {
       const formatCurrency = (number) => isNaN(number) || number == null ? "0" : parseInt(number).toLocaleString('de-DE');
 
-      // AppSheet API URL và key (bạn cần thay thế URL và Key thực tế của bạn)
-      const appSheetApiUrl = 'https://api.appsheet.com/api/v2/apps/YOUR_APP_ID/tables/YOUR_TABLE_NAME/rows';
-      const apiKey = 'YOUR_API_KEY'; // Thay thế bằng API Key thực tế của bạn
+      // Dữ liệu sản phẩm mẫu
+      const productsData = [
+        { "SanPham": "Sản phẩm 1", "SoLuong": 2, "DonGia": 50000, "ThanhTien": 100000 },
+        { "SanPham": "Sản phẩm 2", "SoLuong": 1, "DonGia": 200000, "ThanhTien": 200000 }
+      ];
+      
+      const tbody = document.getElementById('products-tbody');
+      tbody.innerHTML = ''; // Xóa nội dung cũ
 
-      // Gửi yêu cầu GET đến AppSheet API
-      fetch(appSheetApiUrl, {
-        method: 'GET',
-        headers: {
-          'ApplicationAccessKey': apiKey
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        const tbody = document.getElementById('products-tbody');
-        tbody.innerHTML = ''; // Xóa nội dung cũ
-
-        // Kiểm tra nếu có dữ liệu sản phẩm
-        if (data && data.rows) {
-          data.rows.forEach(product => {
-            tbody.innerHTML += `<tr>
-              <td>${product.SanPham || ''}</td>
-              <td>${product.SoLuong || 0}</td>
-              <td>${formatCurrency(product.DonGia)} VND</td>
-              <td>${formatCurrency(product.ThanhTien)} VND</td>
-            </tr>`;
-          });
-        } else {
-          tbody.innerHTML = '<tr><td colspan="4">Không có sản phẩm nào.</td></tr>';
-        }
-      })
-      .catch(error => {
-        console.error('Có lỗi khi tải dữ liệu sản phẩm:', error);
-        const tbody = document.getElementById('products-tbody');
-        tbody.innerHTML = '<tr><td colspan="4">Lỗi khi tải dữ liệu sản phẩm.</td></tr>';
-      });
+      // Hiển thị các sản phẩm trong bảng
+      if (productsData.length > 0) {
+        productsData.forEach(p => {
+          tbody.innerHTML += `<tr>
+            <td>${p.SanPham}</td>
+            <td>${p.SoLuong}</td>
+            <td>${formatCurrency(p.DonGia)} VND</td>
+            <td>${formatCurrency(p.ThanhTien)} VND</td>
+          </tr>`;
+        });
+      } else {
+        tbody.innerHTML = '<tr><td colspan="4">Không có sản phẩm nào.</td></tr>';
+      }
     }
   </script>
 
 </body>
 </html>
+
