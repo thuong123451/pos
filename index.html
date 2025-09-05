@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Test Sản Phẩm</title>
+  <title>Hóa Đơn Bán Hàng</title>
   <style>
     body { font-family: 'Roboto', sans-serif; font-size: 12px; background-color: #fff; padding: 20px; }
     table { width: 100%; border-collapse: collapse; margin-top: 8px; }
@@ -32,30 +32,43 @@
     window.onload = function () {
       const formatCurrency = (number) => isNaN(number) || number == null ? "0" : parseInt(number).toLocaleString('de-DE');
 
-      // Dữ liệu sản phẩm mẫu
-      const productsData = '[{"sanpham":"Sản phẩm 1","soluong":2,"dongia":50000,"thanhtien":100000}, {"sanpham":"Sản phẩm 2","soluong":1,"dongia":200000,"thanhtien":200000}]';
-      
-      const tbody = document.getElementById('products-tbody');
-      tbody.innerHTML = '';
+      // AppSheet API URL và key (bạn cần thay thế URL và Key thực tế của bạn)
+      const appSheetApiUrl = 'https://api.appsheet.com/api/v2/apps/YOUR_APP_ID/tables/YOUR_TABLE_NAME/rows';
+      const apiKey = 'YOUR_API_KEY'; // Thay thế bằng API Key thực tế của bạn
 
-      try {
-        const products = JSON.parse(productsData);
-        products.forEach(p => {
-          tbody.innerHTML += `<tr>
-            <td>${p.sanpham || ''}</td>
-            <td>${p.soluong || 0}</td>
-            <td>${formatCurrency(p.dongia)} VND</td>
-            <td>${formatCurrency(p.thanhtien)} VND</td>
-          </tr>`;
-        });
-      } catch (e) {
-        tbody.innerHTML = '<tr><td colspan="4">Lỗi dữ liệu sản phẩm</td></tr>';
-      }
+      // Gửi yêu cầu GET đến AppSheet API
+      fetch(appSheetApiUrl, {
+        method: 'GET',
+        headers: {
+          'ApplicationAccessKey': apiKey
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        const tbody = document.getElementById('products-tbody');
+        tbody.innerHTML = ''; // Xóa nội dung cũ
+
+        // Kiểm tra nếu có dữ liệu sản phẩm
+        if (data && data.rows) {
+          data.rows.forEach(product => {
+            tbody.innerHTML += `<tr>
+              <td>${product.SanPham || ''}</td>
+              <td>${product.SoLuong || 0}</td>
+              <td>${formatCurrency(product.DonGia)} VND</td>
+              <td>${formatCurrency(product.ThanhTien)} VND</td>
+            </tr>`;
+          });
+        } else {
+          tbody.innerHTML = '<tr><td colspan="4">Không có sản phẩm nào.</td></tr>';
+        }
+      })
+      .catch(error => {
+        console.error('Có lỗi khi tải dữ liệu sản phẩm:', error);
+        const tbody = document.getElementById('products-tbody');
+        tbody.innerHTML = '<tr><td colspan="4">Lỗi khi tải dữ liệu sản phẩm.</td></tr>';
+      });
     }
   </script>
 
 </body>
 </html>
-
-
-
