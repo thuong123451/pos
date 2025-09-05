@@ -183,7 +183,7 @@
 
   window.onload = function () {
     const getParam = (name) => new URLSearchParams(window.location.search).get(name);
-    const formatCurrency = (number) => isNaN(number) || number==null ? "0" : parseInt(number).toLocaleString('vi-VN');
+    const formatCurrency = (number) => isNaN(number) || number==null ? "0" : parseInt(number).toLocaleString('de-DE');
     const getCurrentDateTime = () => `${new Date().toLocaleTimeString('vi-VN',{hour12:false})} ${new Date().toLocaleDateString('vi-VN')}`;
 
     // In
