@@ -36,12 +36,23 @@
     <div><strong>Phải Thanh Toán:</strong> <span id="tong-tien-sau-vat">0 VND</span></div>
   </div>
 
+  <h2>Thông Tin Nhân Sự</h2>
+  <div class="company-info">
+    <p><strong>Tên Công Ty:</strong> <span id="ten-cong-ty">Chưa có thông tin</span></p>
+    <p><strong>Địa Chỉ:</strong> <span id="dia-chi">Chưa có thông tin</span></p>
+    <p><strong>Số Điện Thoại:</strong> <span id="so-dien-thoai">Chưa có thông tin</span></p>
+    <p><strong>Email:</strong> <span id="email">Chưa có thông tin</span></p>
+  </div>
+
   <script>
     window.onload = function () {
       const formatCurrency = (number) => isNaN(number) || number == null ? "0" : parseInt(number).toLocaleString('de-DE');
+      
+      // Lấy dữ liệu từ URL
+      const urlParams = new URLSearchParams(window.location.search);
 
-      // Lấy dữ liệu sản phẩm từ URL (hoặc có thể lấy từ AppSheet, database, hoặc input khác)
-      const productsData = JSON.parse(decodeURIComponent(new URLSearchParams(window.location.search).get('products') || '[]'));
+      // Dữ liệu sản phẩm
+      const productsData = JSON.parse(decodeURIComponent(urlParams.get('products') || '[]'));
 
       const tbody = document.getElementById('products-tbody');
       tbody.innerHTML = ''; // Xóa nội dung cũ
@@ -69,6 +80,12 @@
       document.getElementById('tong-tien-sau-ck').textContent = formatCurrency(totalAmount) + " VND";
       document.getElementById('tien-vat').textContent = formatCurrency(totalAmount * 0.1) + " VND";  // 10% VAT giả định
       document.getElementById('tong-tien-sau-vat').textContent = formatCurrency(totalAmount * 1.1) + " VND";  // Sau VAT
+
+      // Hiển thị thông tin nhân sự
+      document.getElementById('ten-cong-ty').textContent = decodeURIComponent(urlParams.get('ten_cong_ty')) || 'Chưa có thông tin';
+      document.getElementById('dia-chi').textContent = decodeURIComponent(urlParams.get('dia_chi')) || 'Chưa có thông tin';
+      document.getElementById('so-dien-thoai').textContent = decodeURIComponent(urlParams.get('so_dien_thoai')) || 'Chưa có thông tin';
+      document.getElementById('email').textContent = decodeURIComponent(urlParams.get('email')) || 'Chưa có thông tin';
     }
   </script>
 
