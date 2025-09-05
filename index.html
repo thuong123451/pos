@@ -4,145 +4,49 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hóa Đơn Bán Hàng</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-    @page { size: 80mm auto; margin: 1mm; }
-    body { margin: 0; font-family: 'Roboto', sans-serif; font-size: 12px; background-color: #fff; }
-    .receipt { width: 80mm; box-sizing: border-box; color: #000; position: relative; overflow: hidden; }
-
-    @media screen {
-      body { background-color: #f0f0f0; padding: 20px 0; display: flex; flex-direction: column; align-items: center; }
-      .receipt { padding: 4mm; box-shadow: 0 0 15px rgba(0,0,0,0.15); }
-
-      .action-buttons {
-        margin-bottom: 15px;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-        gap: 6px;
-        max-width: 80mm;
-      }
-      .action-buttons button {
-        padding: 8px 4px;
-        font-size: 13px;
-        font-weight: 600;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-        color: white;
-      }
-      #print-btn { background-color: #4CAF50; } #print-btn:hover { background-color: #45a049; }
-      #download-pdf-btn { background-color: #f44336; } #download-pdf-btn:hover { background-color: #da190b; }
-      #send-tax-btn { background-color: #2196F3; } #send-tax-btn:hover { background-color: #0b7dda; }
-    }
-
-    @media print {
-      body { padding: 0; }
-      .action-buttons { display: none; }
-      .receipt { width: 100%; box-shadow: none; }
-    }
-
-    .header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; position: relative; z-index: 1; }
-    .header #company-logo { width: 45px; height: 45px; flex-shrink: 0; }
-    .header .company-info { text-align: left; }
-    .header h1 { margin: 0; font-size: 1.2em; font-weight: 700; }
-    .header p { margin: 1px 0; font-size: 0.9em; }
-
-    .title, .info, .items-table, .notes, .summary, .total-in-words, .qr-section, .footer, .separator { position: relative; z-index: 1; }
-    .title { text-align: center; font-size: 1.6em; font-weight: 700; margin: 10px 0; text-transform: uppercase; }
-    .separator { border: none; border-top: 1px dashed #000; margin: 8px 0; }
-
-    .info p { margin: 3px 0; display: flex; justify-content: space-between; }
-
-    .items-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-    .items-table thead th { text-align: left; border-bottom: 1px dashed #000; padding-bottom: 4px; font-weight: 700; }
-    .items-table tbody td { padding: 4px 1px; vertical-align: top; }
-    .items-table .col-product { width: 45%; }
-    .items-table .col-qty { width: 10%; text-align: center; }
-    .items-table .col-price, .items-table .col-total { width: 22.5%; text-align: right; }
-
-    .summary { margin-top: 8px; }
-    .summary-item { display: flex; justify-content: space-between; margin: 3px 0; }
-    .summary-item.total { font-weight: 700; font-size: 1.3em; margin-top: 6px; border-top: 1px solid #000; padding-top: 6px; }
-
-    .total-in-words { font-style: italic; margin: 4px 0; font-size: 0.95em; }
-
-    .qr-section { text-align: center; margin-top: 10px; }
-    .qr-section h3 { margin: 0 0 5px 0; font-size: 1em; font-weight: 700; }
-    .qr-section img { max-width: 55%; height: auto; }
-    .qr-section .bank-info p { margin: 1px 0; font-size: 0.9em; }
-
-    .footer { text-align: center; margin-top: 10px; }
-    .footer p { margin: 2px 0; font-size: 0.9em; }
+    /* Các style CSS cơ bản */
+    body { font-family: 'Roboto', sans-serif; margin: 0; padding: 20px; }
+    .receipt { width: 80mm; box-sizing: border-box; color: #000; }
+    .header { text-align: center; font-weight: bold; font-size: 1.2em; margin-bottom: 10px; }
+    .items-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .items-table th, .items-table td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+    .summary { margin-top: 10px; text-align: right; }
+    .footer { margin-top: 20px; text-align: center; font-size: 0.9em; }
   </style>
 </head>
 <body>
 
-<div class="action-buttons">
-  <button id="print-btn">🖨️ In Hóa Đơn</button>
-  <button id="download-pdf-btn">📄 Tải PDF</button>
-  <button id="send-tax-btn">📤 Gửi Thuế</button>
-</div>
-
-<div class="receipt" id="receipt-content">
+<div class="receipt">
   <div class="header">
-    <img id="company-logo" src="https://vttecom.com/wp-content/uploads/2025/06/VTT-la-logo-ban-hang-dien-tu.jpg" alt="Logo">
-    <div class="company-info">
-      <h1 id="ten-cong-ty">CTY TNHH Công Nghệ VTTecom</h1>
-      <p id="dia-chi">ĐC: 11 Lê Đại Cang, Buôn Ma Thuột, Đắk Lắk</p>
-      <p><span id="so-dien-thoai">ĐT: 0977138181</span> | <span id="email">contact@vttecom.com</span></p>
-    </div>
+    <p>CTY TNHH Công Nghệ VTTecom</p>
+    <p>Địa chỉ: 11 Lê Đại Cang, Buôn Ma Thuột, Đắk Lắk</p>
+    <p>Điện thoại: 0977138181 | Email: contact@vttecom.com</p>
   </div>
 
-  <hr class="separator">
+  <h3 class="title" style="text-align: center;">Hóa Đơn Bán Hàng</h3>
 
-  <h2 class="title">Hóa Đơn Bán Hàng</h2>
-
-  <div class="info">
-    <p><span>Số Đơn Hàng: <strong id="so-don-hang">DH2508181954</strong></span></p>
-    <p id="so-ban-wrap"><span>Số Bàn: <strong id="so-ban">--</strong></span></p>
-    <p><span>Ngày Đặt: <span id="ngay-dat">18/08/2025</span></span></p>
-    <p><span>In Lúc: <span id="in-luc">21:02:31 18/8/2025</span></span></p>
-  </div>
+  <p><strong>Số Đơn Hàng:</strong> DH2508181954</p>
+  <p><strong>Ngày Đặt:</strong> 18/08/2025</p>
 
   <table class="items-table">
     <thead>
       <tr>
-        <th class="col-product">Sản Phẩm</th>
-        <th class="col-qty">SL</th>
-        <th class="col-price">Đơn Giá</th>
-        <th class="col-total">Thành Tiền</th>
+        <th>Sản Phẩm</th>
+        <th>Số Lượng</th>
+        <th>Đơn Giá</th>
+        <th>Thành Tiền</th>
       </tr>
     </thead>
     <tbody id="products-tbody">
-      <tr><td colspan="4">Chưa có sản phẩm</td></tr>
+      <!-- Các sản phẩm sẽ được thêm tự động vào đây -->
     </tbody>
   </table>
 
-  <div class="notes">
-    <p><strong>Ghi Chú Chung:</strong> <span id="ghi-chu">Không có</span></p>
-  </div>
-
-  <hr class="separator">
-
   <div class="summary">
-    <div class="summary-item"><span>Thành Tiền:</span><span id="thanh-tien">0 VND</span></div>
-    <div class="summary-item"><span>Giảm Giá:</span><span id="giam-gia">0 VND</span></div>
-    <div class="summary-item"><span>Tổng Tiền Sau Chiết Khấu:</span><span id="tong-tien-sau-ck">0 VND</span></div>
-    <div class="summary-item"><span>VAT (<span id="phan-tram-vat">0</span>%):</span><span id="tien-vat">0 VND</span></div>
-    <div class="summary-item total"><span>Phải Thanh Toán:</span><span id="tong-tien-sau-vat">0 VND</span></div>
-  </div>
-
-  <p class="total-in-words"><strong>Bằng Chữ:</strong> <span id="bang-chu">Không</span></p>
-
-  <div class="qr-section">
-    <h3>QUÉT MÃ QR ĐỂ THANH TOÁN</h3>
-    <img id="qr-code-img" src="" alt="VietQR Code">
-    <div class="bank-info">
-      <p id="account-holder" style="font-weight: bold;">CTY TNHH Công Nghệ VTTecom</p>
-      <p id="account-number">19033381058014</p>
-    </div>
+    <p><strong>Tổng Tiền:</strong> <span id="total"></span> VND</p>
+    <p><strong>VAT (0%):</strong> 0 VND</p>
+    <p><strong>Phải Thanh Toán:</strong> <span id="payable"></span> VND</p>
   </div>
 
   <div class="footer">
@@ -151,58 +55,40 @@
 </div>
 
 <script>
-  window.onload = function () {
-    const formatCurrency = (number) => isNaN(number) || number==null ? "0" : parseInt(number).toLocaleString('de-DE');
-    const getCurrentDateTime = () => `${new Date().toLocaleTimeString('vi-VN',{hour12:false})} ${new Date().toLocaleDateString('vi-VN')}`;
+// Hàm để lấy các tham số từ URL
+function getParams() {
+  const params = new URLSearchParams(window.location.search);
+  const products = JSON.parse(params.get('products') || '[]');
+  return products;
+}
 
-    // In
-    document.getElementById('print-btn').addEventListener('click', () => window.print());
+// Hàm để hiển thị các sản phẩm
+function displayProducts(products) {
+  const tbody = document.getElementById('products-tbody');
+  let total = 0;
 
-    // PDF
-    document.getElementById('download-pdf-btn').addEventListener('click', () => {
-      const element = document.getElementById('receipt-content');
-      const heightInMm = element.offsetHeight * 25.4 / 96;
-      html2pdf().from(element).set({
-        margin: 1,
-        filename: `hoadon-${new Date().getTime()}.pdf`,
-        image: { type: 'jpeg', quality: 1 },
-        html2canvas: { scale: 3, useCORS: true },
-        jsPDF: { unit: 'mm', format: [80, heightInMm+5], orientation: 'portrait' }
-      }).save();
-    });
+  products.forEach(product => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${product.sanpham}</td>
+      <td>${product.soluong}</td>
+      <td>${new Intl.NumberFormat('vi-VN').format(product.dongia)}</td>
+      <td>${new Intl.NumberFormat('vi-VN').format(product.thanhtien)}</td>
+    `;
+    tbody.appendChild(row);
+    total += product.thanhtien;
+  });
 
-    // Điền thông tin đơn hàng (Giả sử dữ liệu lấy từ URL hoặc từ nguồn dữ liệu)
-    document.getElementById('so-don-hang').textContent = "DH2508181954";
-    document.getElementById('ngay-dat').textContent = "18/08/2025";
-    document.getElementById('in-luc').textContent = getCurrentDateTime();
+  // Hiển thị tổng tiền và thanh toán
+  document.getElementById('total').textContent = new Intl.NumberFormat('vi-VN').format(total);
+  document.getElementById('payable').textContent = new Intl.NumberFormat('vi-VN').format(total);
+}
 
-    // Cập nhật bảng sản phẩm
-    const products = [
-      { sanpham: "Bàn Ba Bằng", soluong: 1, dongia: 60000, thanhtien: 60000 },
-      { sanpham: "Bàn Libre", soluong: 1, dongia: 40000, thanhtien: 40000 }
-    ];
-
-    const tbody = document.getElementById('products-tbody');
-    products.forEach(p => {
-      tbody.innerHTML += `
-        <tr>
-          <td class="col-product">${p.sanpham}</td>
-          <td class="col-qty">${p.soluong}</td>
-          <td class="col-price">${formatCurrency(p.dongia)}</td>
-          <td class="col-total">${formatCurrency(p.thanhtien)}</td>
-        </tr>
-      `;
-    });
-
-    // Tổng kết
-    const total = products.reduce((acc, p) => acc + p.thanhtien, 0);
-    document.getElementById('thanh-tien').textContent = formatCurrency(total) + " VND";
-    document.getElementById('giam-gia').textContent = "0 VND";
-    document.getElementById('tong-tien-sau-ck').textContent = formatCurrency(total) + " VND";
-    document.getElementById('tien-vat').textContent = "0 VND";
-    document.getElementById('tong-tien-sau-vat').textContent = formatCurrency(total) + " VND";
-    document.getElementById('bang-chu').textContent = "Sáu mươi nghìn đồng";
-  }
+// Khi trang tải xong
+window.onload = function() {
+  const products = getParams();
+  displayProducts(products);
+};
 </script>
 
 </body>
